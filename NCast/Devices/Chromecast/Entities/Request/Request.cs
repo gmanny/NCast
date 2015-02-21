@@ -34,7 +34,7 @@ namespace NCast.Devices.Chromecast.Entities.Request
         {
             JsonSerializerSettings settings = new JsonSerializerSettings();
             settings.NullValueHandling = NullValueHandling.Ignore;
-            return JsonConvert.SerializeObject(this, GetType(), settings);
+            return JsonConvert.SerializeObject(this, settings);
         }
     }
 
@@ -182,7 +182,7 @@ namespace NCast.Devices.Chromecast.Entities.Request
         {
             JsonSerializerSettings x = new JsonSerializerSettings();
 
-            return JsonConvert.SerializeObject(request, typeof(T), x);
+            return JsonConvert.SerializeObject(request, x);
         }
     }
 
