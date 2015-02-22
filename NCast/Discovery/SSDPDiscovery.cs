@@ -25,7 +25,7 @@ namespace NCast.Discovery
         }
         public event EventHandler<SSDPDiscoveredDeviceEventArgs> DeviceDiscovered;
         List<string> HashCache { get; set; }
-        public async void Start()
+        public async Task Start()
         {
 
             foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())

@@ -42,13 +42,19 @@ namespace NCast.Discovery
         {
             CancelSsdpDiscoveryOnMDns = true;
         }
+
+        public override async void Start()
+        {
+            await StartImpl();
+        }
+
         ///-------------------------------------------------------------------------------------------------
         /// <summary>
         ///     Starts discovery of Chromecast dongles in local subnet. Subscribe to <c>DeviceDiscovered</c> to
         ///     receive device information.
         /// </summary>
         ///-------------------------------------------------------------------------------------------------
-        public override async void Start()
+        public async Task StartImpl()
         {
             if (mDnsDiscovery.IsBrowsing)
                 return;
@@ -61,25 +67,27 @@ namespace NCast.Discovery
             // Start a timer to delay the SSDP discovery.
             //ssdpShootOffTimer = new Timer((e) =>
             //{
-                var ssdpTask = new Task(() =>
+                var ssdpTask = new Task<Task>(() =>
                 {
                     Task.Delay(DiscoveryConstants.SsdpInvocationDelay).Wait();
                     if (ssdpCancellation.Token.IsCancellationRequested)
                     {
                         Trace.WriteLine("SSDP Cancelled.");
-                        return;
+                        return Task.FromResult(true);
                         ssdpCancellation.Token.ThrowIfCancellationRequested();
                     }
 
                     Trace.WriteLine("Starting SSDP discovery...");
                     ssdpDiscovery.DeviceDiscovered += SsdpDiscovery_DeviceDiscovered;
-                    ssdpDiscovery.Start();
+                    return ssdpDiscovery.Start();
 
                 }, ssdpCancellation.Token);
 
             ssdpTask.Start();
             //}, this, DiscoveryConstants.SsdpInvocationDelay, Timeout.InfiniteTimeSpan
             //);
+
+            await ssdpTask.Unwrap();
         }
 
         private void MDnsDiscovery_ServiceRemoved(object sender, ServiceAnnouncementEventArgs e)
